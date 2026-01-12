@@ -39,7 +39,6 @@ public class warpdepot {
                             Depot depot = MtrUtil.findDepots(name, context.getSource().getLevel()).stream().findAny().orElse(null);
 
                             if(depot == null) {
-                                // 【注意】这里也有一个sendFailure调用需要检查
                                 context.getSource().sendFailure(Mappings.literalText("Cannot find depot \"" + name + "\""));
                                 return 1;
                             }
@@ -53,8 +52,7 @@ public class warpdepot {
                             player.removeVehicle();
                             player.teleportTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
 
-                            // 【修改点】第54行：将sendSuccess改为lambda形式
-                            final Depot finalDepot = depot; // 创建final变量
+                            final Depot finalDepot = depot;
                             context.getSource().sendSuccess(() -> Mappings.literalText("Warped to " + String.join(" ", getStationName(finalDepot.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))

@@ -38,7 +38,6 @@ public class warpstn {
                             String name = StringArgumentType.getString(context, "name");
                             Station stn = MtrUtil.findStation(name, context.getSource().getLevel());
                             if(stn == null) {
-                                // 【修复】sendFailure只需要Component，不需要Supplier
                                 context.getSource().sendFailure(Mappings.literalText("Cannot find station \"" + name + "\""));
                                 return 1;
                             }
@@ -52,7 +51,6 @@ public class warpstn {
                             player.removeVehicle();
                             player.teleportTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
 
-                            // 【修复】sendSuccess需要Supplier<Component>
                             final Station finalStn = stn;
                             context.getSource().sendSuccess(() -> {
                                 return Mappings.literalText("Warped to " + String.join(" ", getStationName(finalStn.name))).withStyle(ChatFormatting.GREEN);
