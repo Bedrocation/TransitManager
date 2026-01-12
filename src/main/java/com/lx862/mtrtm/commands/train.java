@@ -99,11 +99,14 @@ public class train {
         }
 
         nearestTrain.train.deployTrain();
-        context.getSource().sendSuccess(Mappings.literalText("Deploying the nearest train (Siding " + trainSiding.name + ")...").withStyle(ChatFormatting.GREEN), false);
-        context.getSource().sendSuccess(Mappings.literalText("Train ID: " + trainSiding.getTrainId()).withStyle(ChatFormatting.GREEN), false);
+
+        final Siding finalTrainSiding = trainSiding;
+        context.getSource().sendSuccess(() -> Mappings.literalText("Deploying the nearest train (Siding " + (finalTrainSiding != null ? finalTrainSiding.name : "unknown") + ")...").withStyle(ChatFormatting.GREEN), false);
+
+        context.getSource().sendSuccess(() -> Mappings.literalText("Train ID: " + (finalTrainSiding != null ? finalTrainSiding.getTrainId() : "N/A")).withStyle(ChatFormatting.GREEN), false);
 
         if(nearestTrain.isManual) {
-            context.getSource().sendSuccess(Mappings.literalText("NOTE: Train is currently in manual mode.").withStyle(ChatFormatting.YELLOW), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("NOTE: Train is currently in manual mode.").withStyle(ChatFormatting.YELLOW), false);
         }
         return 1;
     }
@@ -143,7 +146,7 @@ public class train {
                     }
 
                     if(!next && dist < currentRailProgress) {
-                        if((trainData.train.getSpeed() == 0) || isPlatform || (trainData.train.getSpeed() > 0 && justOneMorePath) /* 1 more path if train is running */) {
+                        if((trainData.train.getSpeed() == 0) || isPlatform || (trainData.train.getSpeed() > 0 && justOneMorePath)) {
                             targetDistance = dist;
                             pathIndex = pIndex;
                             break;
@@ -160,7 +163,8 @@ public class train {
             ((TrainAccessorMixin)trainData.train).setRailProgress(targetDistance);
             MtrUtil.syncTrainToPlayers(trainData.train, context.getSource().getLevel().players());
 
-            context.getSource().sendSuccess(Mappings.literalText("Jumped to distance " + Math.round(targetDistance) + "m.").withStyle(ChatFormatting.GREEN), false);
+            final double finalTargetDistance = targetDistance;
+            context.getSource().sendSuccess(() -> Mappings.literalText("Jumped to distance " + Math.round(finalTargetDistance) + "m.").withStyle(ChatFormatting.GREEN), false);
         } else {
             throw new CommandRuntimeException(Mappings.literalText("Cannot find the next path to stop to."));
         }
@@ -172,7 +176,8 @@ public class train {
 
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().clear();
         MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
-        context.getSource().sendSuccess(Mappings.literalText("All passengers cleared from train!").withStyle(ChatFormatting.GREEN), false);
+
+        context.getSource().sendSuccess(() -> Mappings.literalText("All passengers cleared from train!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -181,7 +186,8 @@ public class train {
 
         ((TrainAccessorMixin)nearestTrain.train).getRidingEntities().add(context.getSource().getPlayerOrException().getUUID());
         MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
-        context.getSource().sendSuccess(Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
+
+        context.getSource().sendSuccess(() -> Mappings.literalText("Train boarded!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -193,7 +199,8 @@ public class train {
         Siding trainSiding = railwayData.dataCache.sidingIdMap.get(sidingId);
 
         ((SidingAccessorMixin)trainSiding).getTrains().removeIf(train -> train.id == nearestTrain.train.id);
-        context.getSource().sendSuccess(Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
+
+        context.getSource().sendSuccess(() -> Mappings.literalText("Siding cleared!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -202,7 +209,7 @@ public class train {
         ((TrainAccessorMixin)nearestTrain.train).setElapsedDwellTicks(nearestTrain.train.getTotalDwellTicks());
         MtrUtil.syncTrainToPlayers(nearestTrain.train, context.getSource().getLevel().players());
 
-        context.getSource().sendSuccess(Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
+        context.getSource().sendSuccess(() -> Mappings.literalText("Dwell time skipped!").withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -211,7 +218,8 @@ public class train {
         boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_DWELL);
         TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_DWELL, !halted);
 
-        context.getSource().sendSuccess(Mappings.literalText("Dwell timer for the nearest train has been " + (!halted ? "paused" : "resumed")).withStyle(ChatFormatting.GREEN), false);
+        final boolean finalHalted = halted;
+        context.getSource().sendSuccess(() -> Mappings.literalText("Dwell timer for the nearest train has been " + (!finalHalted ? "paused" : "resumed")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -220,7 +228,8 @@ public class train {
         boolean halted = TransitManager.getTrainState(nearestTrain.train.id, TrainState.HALT_SPEED);
         TransitManager.setTrainState(nearestTrain.train.id, TrainState.HALT_SPEED, !halted);
 
-        context.getSource().sendSuccess(Mappings.literalText("The nearest train has " + (!halted ? "been brought to a halt" : "resumed it's operation")).withStyle(ChatFormatting.GREEN), false);
+        final boolean finalHalted = halted;
+        context.getSource().sendSuccess(() -> Mappings.literalText("The nearest train has " + (!finalHalted ? "been brought to a halt" : "resumed it's operation")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -229,7 +238,8 @@ public class train {
         boolean skipCollision = TransitManager.getTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION);
         TransitManager.setTrainState(nearestTrain.train.id, TrainState.SKIP_COLLISION, !skipCollision);
 
-        context.getSource().sendSuccess(Mappings.literalText("Collision detection for the nearest train is now " + (!skipCollision ? "bypassed" : "reset to normal")).withStyle(ChatFormatting.GREEN), false);
+        final boolean finalSkipCollision = skipCollision;
+        context.getSource().sendSuccess(() -> Mappings.literalText("Collision detection for the nearest train is now " + (!finalSkipCollision ? "bypassed" : "reset to normal")).withStyle(ChatFormatting.GREEN), false);
         return 1;
     }
 
@@ -255,7 +265,7 @@ public class train {
         ExposedTrainData trainData = MtrUtil.getNearestTrain(context.getSource().getLevel(), player, player.getEyePosition());
 
         if(trainData == null) {
-            context.getSource().sendSuccess(Mappings.literalText("Cannot find any train.").withStyle(ChatFormatting.RED), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("Cannot find any train.").withStyle(ChatFormatting.RED), false);
             return 1;
         }
 
@@ -272,7 +282,7 @@ public class train {
         List<Siding> sidingList = data.sidings.stream().filter(sd -> sd.id == sidingId).toList();
 
         if(sidingList.isEmpty()) {
-            context.getSource().sendSuccess(Mappings.literalText("Cannot find corresponding siding.").withStyle(ChatFormatting.RED), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("Cannot find corresponding siding.").withStyle(ChatFormatting.RED), false);
             return 1;
         }
 
@@ -287,7 +297,7 @@ public class train {
         }
 
         if(sidingDepot == null) {
-            context.getSource().sendSuccess(Mappings.literalText("No depot associated with that siding.").withStyle(ChatFormatting.RED), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("No depot associated with that siding.").withStyle(ChatFormatting.RED), false);
             return 1;
         }
 
@@ -367,7 +377,9 @@ public class train {
         HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, Mappings.literalText(ridingEntitiesStr.toString()).withStyle(ChatFormatting.GREEN));
         ClickEvent clickEvent = new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/traininv " + siding.id);
 
-        context.getSource().sendSuccess(Mappings.literalText("===== " + title + " =====").withStyle(ChatFormatting.GREEN), false);
+        final String finalTitle = title;
+        context.getSource().sendSuccess(() -> Mappings.literalText("===== " + finalTitle + " =====").withStyle(ChatFormatting.GREEN), false);
+
         sendKeyValueFeedback(context, Mappings.literalText("Mode: "), isManual);
         sendKeyValueFeedback(context, Mappings.literalText("Depot/Siding: "), teleportToSavedRailText(depotName, siding));
         sendKeyValueFeedback(context, Mappings.literalText("Position: "), pos);
@@ -385,7 +397,7 @@ public class train {
         }
 
         if(!((TrainAccessorMixin)trainData.train).getInventory().isEmpty()) {
-            context.getSource().sendSuccess(Mappings.literalText("Train Inventory: (Click Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withClickEvent(clickEvent)), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("Train Inventory: (Click Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withClickEvent(clickEvent)), false);
         }
 
         if(trainData.isManual && trainData.isCurrentlyManual) {
@@ -394,13 +406,13 @@ public class train {
         }
 
         if(!ridingEntities.isEmpty()) {
-            context.getSource().sendSuccess(Mappings.literalText("Riding players: (Hover Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withHoverEvent(hoverEvent)), false);
+            context.getSource().sendSuccess(() -> Mappings.literalText("Riding players: (Hover Here)").withStyle(ChatFormatting.GOLD).withStyle(style -> style.withHoverEvent(hoverEvent)), false);
         }
         return 1;
     }
 
     private static void sendKeyValueFeedback(CommandContext<CommandSourceStack> context, MutableComponent key, MutableComponent value) {
-        context.getSource().sendSuccess(key.withStyle(ChatFormatting.GOLD).append(value), false);
+        context.getSource().sendSuccess(() -> key.withStyle(ChatFormatting.GOLD).append(value), false);
     }
 
     private static MutableComponent teleportToSavedRailText(MutableComponent originalText, SavedRailBase savedRail) {

@@ -22,15 +22,15 @@ public class warpstn {
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((commandContext, suggestionsBuilder) -> {
-                            RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
-                                String target = suggestionsBuilder.getRemainingLowerCase();
+                                    RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
+                                    String target = suggestionsBuilder.getRemainingLowerCase();
 
-                                List<String> toBeSuggested = Util.formulateMatchingString(target, data.stations.stream().map(e -> e.name).toList());
-                                for(String stn : toBeSuggested) {
-                                    suggestionsBuilder.suggest(stn);
+                                    List<String> toBeSuggested = Util.formulateMatchingString(target, data.stations.stream().map(e -> e.name).toList());
+                                    for(String stn : toBeSuggested) {
+                                        suggestionsBuilder.suggest(stn);
+                                    }
+                                    return suggestionsBuilder.buildFuture();
                                 }
-                                return suggestionsBuilder.buildFuture();
-                            }
                         )
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
@@ -38,6 +38,7 @@ public class warpstn {
                             String name = StringArgumentType.getString(context, "name");
                             Station stn = MtrUtil.findStation(name, context.getSource().getLevel());
                             if(stn == null) {
+                                // 【修复】sendFailure只需要Component，不需要Supplier
                                 context.getSource().sendFailure(Mappings.literalText("Cannot find station \"" + name + "\""));
                                 return 1;
                             }
@@ -47,10 +48,15 @@ public class warpstn {
                             double playerY = player.getY();
                             BlockPos targetPos = new BlockPos((int)midpointX, (int)playerY, (int)midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
-                            
+
                             player.removeVehicle();
                             player.teleportTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
-                            context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(stn.name))).withStyle(ChatFormatting.GREEN), false);
+
+                            // 【修复】sendSuccess需要Supplier<Component>
+                            final Station finalStn = stn;
+                            context.getSource().sendSuccess(() -> {
+                                return Mappings.literalText("Warped to " + String.join(" ", getStationName(finalStn.name))).withStyle(ChatFormatting.GREEN);
+                            }, false);
                             return 1;
                         }))
         );

@@ -1,6 +1,7 @@
 # TransitManager
-This is a server-side addon for Minecraft Transit Railway 3 Mod, adding commands that allows you to have better control of traffic in Minecraft Transit Railway.
-Available for Minecraft Fabric 1.17.1 - 1.19.4
+Fork from [DistrictOfJoban/TransitManager](https://github.com/DistrictOfJoban/TransitManager), available for Minecraft Fabric 1.20.1
+
+This is a server-side addon for Minecraft Transit Railway 3 Mod, adding commands that allows you to have better control of traffic in Minecraft Transit Railway. 
 
 ## Commands
 | Command                                                         | Description                                                                                                                                                                                                         | Permission Level |
@@ -31,9 +32,6 @@ The config file are automatically generated in `config/transitmanager/config.jso
 |---------------------------|---------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | shearPSDOpLevel           | 0             | This defines the OP Level required to shear the top part of the Platform Screen Doors in the MTR Mod. Server owners may want to bump this up to OP Level 1/2 to prevent non-builders from modifying the PSD.                                                                                                                                                                                                        |
 | mtrJourneyPlannerTickTime | 0             | -1: The MTR Online Journey Planner will be completely disabled<br>0: The MTR Online Journey Planner will work as normal<br>>0: The MTR Online Journey Planner will only tick on the specified tick.<br><br>For example, if the value is 20, it will only update every 20 ticks or 1 second.<br>The higher the value, the less it updates and the lower the MSPT is, this will however slow down<br>journey planner. |
-
-## Bugs/Suggestion
-If you have any questions or suggestions, feel free to open an GitHub issue [here](https://github.com/DistrictOfJoban/TransitManager/issues) :)
 
 ## License
 This project is licensed under the MIT License.

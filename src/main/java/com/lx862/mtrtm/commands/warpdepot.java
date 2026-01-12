@@ -22,15 +22,15 @@ public class warpdepot {
                 .requires(source -> source.hasPermission(2))
                 .then(Commands.argument("name", StringArgumentType.greedyString())
                         .suggests((commandContext, suggestionsBuilder) -> {
-                            RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
-                                String target = suggestionsBuilder.getRemainingLowerCase();
+                                    RailwayData data = RailwayData.getInstance(commandContext.getSource().getLevel());
+                                    String target = suggestionsBuilder.getRemainingLowerCase();
 
-                                List<String> toBeSuggested = Util.formulateMatchingString(target, data.depots.stream().map(e -> e.name).toList());
-                                for(String stn : toBeSuggested) {
-                                    suggestionsBuilder.suggest(stn);
+                                    List<String> toBeSuggested = Util.formulateMatchingString(target, data.depots.stream().map(e -> e.name).toList());
+                                    for(String stn : toBeSuggested) {
+                                        suggestionsBuilder.suggest(stn);
+                                    }
+                                    return suggestionsBuilder.buildFuture();
                                 }
-                                return suggestionsBuilder.buildFuture();
-                            }
                         )
                         .executes(context -> {
                             ServerPlayer player = context.getSource().getPlayerOrException();
@@ -39,6 +39,7 @@ public class warpdepot {
                             Depot depot = MtrUtil.findDepots(name, context.getSource().getLevel()).stream().findAny().orElse(null);
 
                             if(depot == null) {
+                                // 【注意】这里也有一个sendFailure调用需要检查
                                 context.getSource().sendFailure(Mappings.literalText("Cannot find depot \"" + name + "\""));
                                 return 1;
                             }
@@ -48,10 +49,13 @@ public class warpdepot {
                             double playerY = player.getY();
                             BlockPos targetPos = new BlockPos((int)midpointX, (int)playerY, (int)midpointZ);
                             BlockPos finalPos = Util.getNonOccupiedPos(world, targetPos);
-                            
+
                             player.removeVehicle();
                             player.teleportTo(finalPos.getX(), finalPos.getY(), finalPos.getZ());
-                            context.getSource().sendSuccess(Mappings.literalText("Warped to " + String.join(" ", getStationName(depot.name))).withStyle(ChatFormatting.GREEN), false);
+
+                            // 【修改点】第54行：将sendSuccess改为lambda形式
+                            final Depot finalDepot = depot; // 创建final变量
+                            context.getSource().sendSuccess(() -> Mappings.literalText("Warped to " + String.join(" ", getStationName(finalDepot.name))).withStyle(ChatFormatting.GREEN), false);
                             return 1;
                         }))
         );

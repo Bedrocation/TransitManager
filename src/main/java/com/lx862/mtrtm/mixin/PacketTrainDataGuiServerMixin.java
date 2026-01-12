@@ -26,7 +26,8 @@ public class PacketTrainDataGuiServerMixin {
     @Inject(method = "announceS2C", at = @At("HEAD"), cancellable = true)
     private static void announceS2C(ServerPlayer player, String message, ResourceLocation soundId, CallbackInfo ci) {
         if(message.startsWith("TheCakeIsALie")) {
-            RailwayData data = RailwayData.getInstance(player.level);
+            // 修复点：使用 level() 方法替代直接访问私有字段
+            RailwayData data = RailwayData.getInstance(player.level());
             if(data == null) return;
 
             String[] splitted = message.split(";");

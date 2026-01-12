@@ -5,24 +5,29 @@ plugins {
 	id "de.undercouch.download" version "4.1.2"
 }
 
-sourceCompatibility = JavaVersion.VERSION_16
-targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
 
 group = project.maven_group
 
-def default_minecraft_version = "1.19.2"
+def default_minecraft_version = "1.20.1"
 def minecraft_version = project.properties.containsKey("buildVersion") ? project.getProperties().get("buildVersion") : default_minecraft_version
-def minecraft_major_version = minecraft_version.split("\\.")[0] as int // Always return 1, unless mojang goes haywire :P
+def minecraft_major_version = minecraft_version.split("\\.")[0] as int
 def minecraft_main_version = minecraft_version.split("\\.")[1] as int
 def minecraft_minor_version = minecraft_version.split("\\.").size() > 2 ? minecraft_version.split("\\.")[2] as int : 0
 def minecraft_version_str = (minecraft_major_version as String) + (minecraft_main_version as String).padLeft(2, '0') + (minecraft_minor_version as String).padLeft(2, '0')
 def use_absolute_version = (minecraft_version_str as int) >= 11903
 def mc_requirement = use_absolute_version ? minecraft_version : "${minecraft_major_version}.${minecraft_main_version}.x"
 
+def is_1_20_1 = minecraft_version == "1.20.1"
+def is_1_19_3 = minecraft_version == "1.19.3" || minecraft_version == "1.19.4"
+
 def loader_version = project.loader_version
 def fapi_version = getModrinthVersion("fabric", minecraft_version, "fabric-api")
 
 version = project.mod_version + "+" + "mc" + minecraft_version
+
+def mtrBaseURL = is_1_20_1 ? "https://storage.zbx1425.cn/mtr-artifacts/libs/" : "https://www.minecrafttransitrailway.com/libs/"
 
 repositories {
 	// Add repositories to retrieve artifacts from in here.
@@ -33,23 +38,23 @@ repositories {
 }
 
 if(!project.file("lib/mtr-fabric.jar").exists()) {
-	download {
-		src "https://www.minecrafttransitrailway.com/libs/${project.mtr_version}/MTR-fabric-${minecraft_version}-${project.mtr_version}.jar"
-		dest "lib/mtr-fabric.jar"
-		overwrite true
-	}
+    download {
+        src "${mtrBaseURL}latest/MTR-fabric-${minecraft_version}-latest.jar"
+        dest "lib/mtr-fabric.jar"
+        overwrite true
+    }
 }
 
 task setupLibrary() {
-	doLast {
-		delete("lib/mtr-fabric.jar")
-		download {
-			src "https://www.minecrafttransitrailway.com/libs/${project.mtr_version}/MTR-fabric-${minecraft_version}-${project.mtr_version}.jar"
-			dest "lib/mtr-fabric.jar"
-			overwrite true
-		}
-        println("MTR Downloaded, you may need to refresh gradle for changes to take effect.")
-	}
+    doLast {
+        delete("lib/mtr-fabric.jar")
+        download {
+            src "${mtrBaseURL}latest/MTR-fabric-${minecraft_version}-latest.jar"
+            dest "lib/mtr-fabric.jar"
+            overwrite true
+        }
+        println("MTR Downloaded from ${mtrBaseURL}, you may need to refresh gradle for changes to take effect.")
+    }
 }
 
 task downloadOptimizedMod() {

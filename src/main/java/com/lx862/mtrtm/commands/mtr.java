@@ -93,7 +93,10 @@ public class mtr {
                 }
             }
 
-            context.getSource().sendSuccess(Mappings.literalText("Cleared " + clearedCounter + " train(s) in depot " + IGui.formatStationName(depot.name)).withStyle(ChatFormatting.GREEN), false);
+            final int finalCounter = clearedCounter;
+            final Depot finalDepot = depot;
+
+            context.getSource().sendSuccess(() -> Mappings.literalText("Cleared " + finalCounter + " train(s) in depot " + IGui.formatStationName(finalDepot.name)).withStyle(ChatFormatting.GREEN), false);
         });
     }
 
@@ -106,8 +109,10 @@ public class mtr {
         } catch (Exception ignored) {}
 
         MtrUtil.findDepots(depotName, context.getSource().getLevel()).forEach(depot -> {
-            railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), depot.id);
-            context.getSource().sendSuccess(Mappings.literalText("Refreshing " + String.join(" ", depot.name) + " (" + depot.routeIds.size() + " Routes instructions)").withStyle(ChatFormatting.GREEN), false);
+            final Depot finalDepot = depot;
+            railwayData.railwayDataPathGenerationModule.generatePath(context.getSource().getServer(), finalDepot.id);
+
+            context.getSource().sendSuccess(() -> Mappings.literalText("Refreshing " + String.join(" ", finalDepot.name) + " (" + finalDepot.routeIds.size() + " Routes instructions)").withStyle(ChatFormatting.GREEN), false);
         });
     }
 }
